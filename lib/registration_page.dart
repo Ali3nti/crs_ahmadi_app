@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crs_ahmadi/end_page.dart';
+import 'package:crs_ahmadi/response_model.dart';
 import 'package:crs_ahmadi/uploader_container.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-import 'file_uploader_container.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -71,7 +73,7 @@ class _RegistrationPageState extends State<RegistrationPage>
     if (selectedFileList.isEmpty) return;
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://127.0.0.1/api/upload_files'),
+      Uri.parse('http://127.0.0.1/api/send_msg'),
     );
     request.files.add(
       await http.MultipartFile.fromPath('file', selectedFileList.first.path),
@@ -88,10 +90,61 @@ class _RegistrationPageState extends State<RegistrationPage>
     }
 
     var response = await request.send();
+    print(response.reasonPhrase.toString());
     if (response.statusCode == 200) {
       print('File uploaded successfully');
     } else {
       print('File upload failed');
+    }
+  }
+
+  Future<DataResponse> sendMSG({
+    String? name,
+    String? phone,
+    String? city,
+    String? loe,
+    int? titleId,
+    int? reporterId,
+    required String message,
+    List<dynamic>? files,
+  }) async {
+    Uri uri = Uri.parse(
+      "http://127.0.0.1/crs_ahmadi_server/public/api/send_msg",
+    );
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+    var msg = jsonEncode({
+      "name": name,
+      "phone": phone,
+      "city": city,
+      "loe": loe,
+      "titleId": titleId,
+      "reporterId": reporterId,
+      "message": message,
+      "files": files,
+      // (files.isNotEmpty)
+      //     ? (!kIsWeb)
+      //     ? files.map((e) => base64Encode(e.readAsBytesSync())).toList()
+      //     : files.map((e) => base64Encode(e)).toList()
+      //     : null
+    });
+
+    final response = await http.post(
+      uri,
+      headers: headers,
+      encoding: Encoding.getByName('utf-8'),
+      body: msg,
+    );
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print("**!!!** sendMSG response: ---->  ${response.body}");
+      }
+      return DataResponse.fromJson(jsonDecode(response.body));
+    } else {
+      String errorCode = response.statusCode.toString();
+      throw Exception(
+        'Failed to connect -sendMSG-: $errorCode -> ${response.body}',
+      );
     }
   }
 
@@ -581,9 +634,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           child: UploaderContainer(
                                             onChanged: (list) {
                                               filesList = list;
-                                              setState(() {
-
-                                              });
+                                              setState(() {});
                                             },
                                           ),
                                         ),
@@ -811,7 +862,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               ),
               SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: ()=>uploadFile(filesList),
+                onPressed: () => sendMSG(name: "ali", message: 'hello'),
                 icon: Icon(Icons.arrow_back_ios_new),
                 label: Text('ثبت و ارسال پیام'),
                 style: ElevatedButton.styleFrom(
