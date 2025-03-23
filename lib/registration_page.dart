@@ -1,4 +1,6 @@
+
 import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:crs_ahmadi/end_page.dart';
@@ -106,44 +108,46 @@ class _RegistrationPageState extends State<RegistrationPage>
     int? titleId,
     int? reporterId,
     required String message,
-    List<dynamic>? files,
+    List<File>? files, // تغییر نوع files به لیست فایل‌ها
   }) async {
-    Uri uri = Uri.parse(
-      "http://127.0.0.1/crs_ahmadi_server/public/api/send_msg",
-    );
-    Map<String, String> headers = {'Content-Type': 'application/json'};
-    var msg = jsonEncode({
-      "name": name,
-      "phone": phone,
-      "city": city,
-      "loe": loe,
-      "titleId": titleId,
-      "reporterId": reporterId,
-      "message": message,
-      "files": files,
-      // (files.isNotEmpty)
-      //     ? (!kIsWeb)
-      //     ? files.map((e) => base64Encode(e.readAsBytesSync())).toList()
-      //     : files.map((e) => base64Encode(e)).toList()
-      //     : null
-    });
+    Uri uri = Uri.parse("http://127.0.0.1/crs_ahmadi_server/public/api/send_msg");
 
-    final response = await http.post(
-      uri,
-      headers: headers,
-      encoding: Encoding.getByName('utf-8'),
-      body: msg,
-    );
+    var request = http.MultipartRequest("POST", uri);
+
+    // اضافه کردن فیلدهای متنی
+    request.fields['name'] = name ?? 'null';
+    request.fields['phone'] = phone ?? 'null';
+    request.fields['city'] = city ?? 'null';
+    request.fields['loe'] = loe ?? 'null';
+    request.fields['titleId'] = titleId?.toString() ?? '0';
+    request.fields['reporterId'] = reporterId?.toString() ?? '0';
+    request.fields['message'] = message;
+
+    // اضافه کردن فایل‌ها
+    if (files != null && files.isNotEmpty) {
+      for (var file in files) {
+        var stream = http.ByteStream(file.openRead());
+        var length = await file.length();
+        var multipartFile = http.MultipartFile(
+          'files[]', // مطمئن شوید که این نام در سرور شما پشتیبانی می‌شود
+          stream,
+          length,
+          filename: basename(file.path),
+        );
+        request.files.add(multipartFile);
+      }
+    }
+
+    // ارسال درخواست
+    var response = await request.send();
 
     if (response.statusCode == 200) {
-      if (kDebugMode) {
-        print("**!!!** sendMSG response: ---->  ${response.body}");
-      }
-      return DataResponse.fromJson(jsonDecode(response.body));
+      var responseData = await response.stream.bytesToString();
+      print("**!!!** sendMSG response: ---->  $responseData");
+      return DataResponse.fromJson(jsonDecode(responseData));
     } else {
-      String errorCode = response.statusCode.toString();
       throw Exception(
-        'Failed to connect -sendMSG-: $errorCode -> ${response.body}',
+        'Failed to connect -sendMSG-: ${response.statusCode} -> ${await response.stream.bytesToString()}',
       );
     }
   }
@@ -153,7 +157,7 @@ class _RegistrationPageState extends State<RegistrationPage>
   List<String> reporterList = ["زائرین", "خدام", "پرسنل", "شهروندان"];
   String? titleSelectedValue;
   String? reporterSelectedValue;
-  List<dynamic> filesList = [];
+  List<File> filesList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -862,7 +866,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               ),
               SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => sendMSG(name: "ali", message: 'hello'),
+                onPressed: () => sendMSG(name: "ali", message: 'hello', files: filesList),
                 icon: Icon(Icons.arrow_back_ios_new),
                 label: Text('ثبت و ارسال پیام'),
                 style: ElevatedButton.styleFrom(

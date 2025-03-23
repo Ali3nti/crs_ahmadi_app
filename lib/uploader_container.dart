@@ -12,7 +12,7 @@ class UploaderContainer extends StatefulWidget {
     this.maxFile = 9,
     required this.onChanged,
   });
-  final Function(List<dynamic>) onChanged;
+  final Function(List<File>) onChanged;
   final int maxFile;
 
   @override
