@@ -2,6 +2,7 @@ import 'package:crs_ahmadi/registration_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -22,7 +23,6 @@ class _SplashPageState extends State<SplashPage>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..forward();
-
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
@@ -32,22 +32,15 @@ class _SplashPageState extends State<SplashPage>
     super.dispose();
   }
 
-  void _navigateToNextPage() {
-    Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.leftToRightWithFade,
-        child: RegistrationPage(),
-      ),
-    );
-  }
-
-  void _goToHomePage() {
-    // Implement navigation to the home page or any other action
-    // For now, we can just show a snackbar
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Going to Home Page!')));
+  Future<void> openLink() async {
+    final Uri url = Uri.parse('https://shahecheragh.ir');
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.inAppWebView,
+      webOnlyWindowName: '_self',
+    )) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
@@ -77,16 +70,11 @@ class _SplashPageState extends State<SplashPage>
                               ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  SizedBox(
-                                    width: 150,
-                                    height: 150,
-                                    child: Image.network(
-                                      'https://astanahmadi.com/wp-content/uploads/2024/01/%D8%AD%D8%B1%D9%85-%D9%85%D8%B7%D9%87%D8%B1-%D8%AD%D8%B6%D8%B1%D8%AA-%D8%B4%D8%A7%D9%87%DA%86%D8%B1%D8%A7%D8%BA-%D8%B9%D9%84%DB%8C%D9%87-%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85.jpg',
-                                      width: 150,
-                                      height: 150,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/001.jpg") ,
-                                    ),
+                                  Image.asset(
+                                    "assets/images/001.jpg",
+                                    width: 250,
+                                    height: 250,
+                                    fit: BoxFit.contain,
                                   ),
                                   SizedBox(width: 20),
                                   Expanded(
@@ -115,15 +103,12 @@ class _SplashPageState extends State<SplashPage>
                                                       fontSize: 24,
                                                     ),
                                                     textScaler:
-                                                        TextScaler.linear(
-                                                          0.7,
-                                                        ),
+                                                        TextScaler.linear(0.7),
                                                   ),
                                                 ),
                                               ),
                                               TextSpan(
-                                                text:
-                                                'خوش آمدید',
+                                                text: 'خوش آمدید',
                                                 style: GoogleFonts.lalezar(
                                                   fontSize: 24,
                                                 ),
@@ -137,7 +122,6 @@ class _SplashPageState extends State<SplashPage>
                                           textAlign: TextAlign.justify,
                                           style: TextStyle(fontSize: 16),
                                         ),
-
                                       ],
                                     ),
                                   ),
@@ -145,10 +129,11 @@ class _SplashPageState extends State<SplashPage>
                               )
                               : Column(
                                 children: [
-                                  Image.network(
-                                    'https://eform.shahecheragh.ir/collect/attach/preview/4062.jpg',
-                                    width: double.infinity,
-                                    height: 150,
+                                  Image.asset(
+                                    "assets/images/001.jpg",
+                                    width: 250,
+                                    height: 250,
+                                    fit: BoxFit.contain,
                                   ),
                                   SizedBox(height: 20),
                                   RichText(
@@ -156,7 +141,7 @@ class _SplashPageState extends State<SplashPage>
                                       children: [
                                         TextSpan(
                                           text:
-                                          'سامانه ثبت شکایات، انتقادات و پیشنهادات آستان مقدس حضرت احمد بن موسی الکاظم شاهچراغ ',
+                                              'به سامانه ثبت شکایات، انتقادات و پیشنهادات آستان مقدس حضرت احمد بن موسی الکاظم شاهچراغ',
                                           style: GoogleFonts.lalezar(
                                             fontSize: 24,
                                           ),
@@ -171,11 +156,17 @@ class _SplashPageState extends State<SplashPage>
                                               style: GoogleFonts.lalezar(
                                                 fontSize: 24,
                                               ),
-                                              textScaler:
-                                              TextScaler.linear(
+                                              textScaler: TextScaler.linear(
                                                 0.7,
                                               ),
                                             ),
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text:
+                                          'خوش آمدید',
+                                          style: GoogleFonts.lalezar(
+                                            fontSize: 24,
                                           ),
                                         ),
                                       ],
@@ -189,7 +180,6 @@ class _SplashPageState extends State<SplashPage>
 
                                     style: TextStyle(fontSize: 16),
                                   ),
-
                                 ],
                               );
                         },
@@ -203,23 +193,39 @@ class _SplashPageState extends State<SplashPage>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: _navigateToNextPage,
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.leftToRightWithFade,
+                          child: RegistrationPage(),
+                        ),
+                      );
+                    },
                     icon: Icon(Icons.arrow_back_ios_new),
-                    label: Text('صفحه بعد'),
+                    label: Text(
+                      'ورود به فرم ثبت شکایات',
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+
                     style: ElevatedButton.styleFrom(
+                      elevation: 6,
                       padding: EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 10,
                       ),
-                      textStyle: TextStyle(fontSize: 16),
+                      backgroundColor: Colors.lightGreen,
+                      textStyle: TextStyle(fontSize: 16, color: Colors.black),
                     ),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton.icon(
-                    onPressed: _goToHomePage,
+                    onPressed: openLink,
                     icon: Icon(Icons.home),
                     label: Text('صفحه اصلی سایت'),
                     style: ElevatedButton.styleFrom(
+                      elevation: 6,
+
                       padding: EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 10,

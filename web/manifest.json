@@ -1,11 +1,11 @@
 {
-    "name": "crs_ahmadi",
-    "short_name": "crs_ahmadi",
+    "name": "سامانه ثبت شکایات، انتقادات و پیشنهادات آستان مقدس شاهچراغ علیه السلام",
+    "short_name": "سامانه ثبت شکایات",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "CRS - Complaint Registration System",
+    "background_color": "#000175C2",
+    "theme_color": "#000175C2",
+    "description": "سامانه ثبت شکایات، انتقادات و پیشنهادات آستان مقدس شاهچراغ علیه السلام",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

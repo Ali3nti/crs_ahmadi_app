@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'dart:io';
@@ -6,12 +5,13 @@ import 'dart:io';
 import 'package:crs_ahmadi/end_page.dart';
 import 'package:crs_ahmadi/response_model.dart';
 import 'package:crs_ahmadi/uploader_container.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -52,17 +52,13 @@ class _RegistrationPageState extends State<RegistrationPage>
     );
   }
 
-  void _goToHomePage(BuildContext context) {
-    // Implement navigation to the home page or any other action
-    // For now, we can just show a snackbar
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Going to Home Page!')));
-  }
-
   final TextEditingController nameController = TextEditingController();
 
   final TextEditingController phoneController = TextEditingController();
+
+  final TextEditingController cityController = TextEditingController();
+
+  final TextEditingController edulevellController = TextEditingController();
 
   final TextEditingController titleController = TextEditingController();
 
@@ -105,12 +101,12 @@ class _RegistrationPageState extends State<RegistrationPage>
     String? phone,
     String? city,
     String? loe,
-    int? titleId,
-    int? reporterId,
+    String? titleId,
+    String? reporterId,
     required String message,
     List<File>? files, // تغییر نوع files به لیست فایل‌ها
   }) async {
-    Uri uri = Uri.parse("http://127.0.0.1/crs_ahmadi_server/public/api/send_msg");
+    Uri uri = Uri.parse("https://alinematollahi.ir/api/send_msg");
 
     var request = http.MultipartRequest("POST", uri);
 
@@ -132,7 +128,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           'files[]', // مطمئن شوید که این نام در سرور شما پشتیبانی می‌شود
           stream,
           length,
-          filename: basename(file.path),
+          filename: file.path.split('/').last,
+          contentType: MediaType('application', 'octet-stream'),
         );
         request.files.add(multipartFile);
       }
@@ -158,6 +155,17 @@ class _RegistrationPageState extends State<RegistrationPage>
   String? titleSelectedValue;
   String? reporterSelectedValue;
   List<File> filesList = [];
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri telUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber, // مثال: '+989123456789'
+    );
+    // ابتدا `tel:` را امتحان کنید (برای موبایل)
+    if (await canLaunchUrl(telUri)) {
+      await launchUrl(telUri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,20 +194,11 @@ class _RegistrationPageState extends State<RegistrationPage>
                               ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  SizedBox(
+                                  Image.asset(
+                                    "assets/images/001.jpg",
                                     width: 300,
                                     height: 300,
-                                    child: Image.network(
-                                      'https://astanahmadi.com/wp-content/uploads/2024/01/%D8%AD%D8%B1%D9%85-%D9%85%D8%B7%D9%87%D8%B1-%D8%AD%D8%B6%D8%B1%D8%AA-%D8%B4%D8%A7%D9%87%DA%86%D8%B1%D8%A7%D8%BA-%D8%B9%D9%84%DB%8C%D9%87-%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85.jpg',
-                                      width: 200,
-                                      height: 200,
-                                      fit: BoxFit.contain,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Image.asset(
-                                                "assets/images/001.jpg",
-                                              ),
-                                    ),
+                                    fit: BoxFit.contain,
                                   ),
                                   SizedBox(width: 20),
                                   Expanded(
@@ -236,7 +235,16 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           ),
                                         ),
 
-                                        SizedBox(height: 16),
+                                        Container(
+                                          height: 1,
+                                          color: Colors.deepPurple.withAlpha(
+                                            45,
+                                          ),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                        ),
                                         Text(
                                           'مسیر های ارسال شکایات، انتقادات یا پیشنهادات',
                                           textAlign: TextAlign.justify,
@@ -247,24 +255,80 @@ class _RegistrationPageState extends State<RegistrationPage>
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
-
                                           children: [
                                             SizedBox(height: 8),
-
-                                            Text(
-                                              'شماره تلفن تماس: 09368513575',
+                                            Row(
+                                              children: [
+                                                Text('◦ شماره تلفن تماس: '),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    _makePhoneCall(
+                                                      "09368513575",
+                                                    );
+                                                  },
+                                                  style: TextButton.styleFrom(
+                                                    padding: EdgeInsets.zero,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    elevation: 0,
+                                                    overlayColor:
+                                                        Colors.transparent,
+                                                    shadowColor:
+                                                        Colors.transparent,
+                                                  ),
+                                                  child: Text(
+                                                    '۰۹۳۶۸۵۱۳۵۷۵',
+                                                    locale: Locale("fa", "IR"),
+                                                    style: TextStyle(
+                                                      fontFamily: "Shabnam",
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            SizedBox(height: 8),
-                                            Text(
-                                              'ارتباط در شبکه های اجتماعی: (بله، ایتا، روبیکا و واتساپ) 09368513575',
+                                            Container(
+                                              height: 1,
+                                              color: Colors.black.withAlpha(45),
+                                              margin: EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 8,
+                                              ),
                                             ),
-                                            SizedBox(height: 8),
-                                            Text(
-                                              'مراجعات حضوری: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن اصلی، طبقه دوم، جنب اداره کل حراست آستان مقدس، واحد رسیدگی به شکایات',
+                                            Row(
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    '◦ ارتباط در شبکه های اجتماعی(بله، ایتا، روبیکا و واتساپ): ',
+                                                  ),
+                                                ),
+                                                Flexible(
+                                                  child: SelectableText(
+                                                    '۰۹۳۶۸۵۱۳۵۷۵',
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            SizedBox(height: 8),
+                                            Container(
+                                              height: 1,
+                                              color: Colors.black.withAlpha(45),
+                                              margin: EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 8,
+                                              ),
+                                            ),
                                             Text(
-                                              'ارتباط از طریق صندوق های دریافت شکایات در صحن های حرم مطهر',
+                                              '◦ مراجعات حضوری: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن اصلی، طبقه دوم، جنب اداره کل حراست آستان مقدس، واحد رسیدگی به شکایات',
+                                            ),
+                                            Container(
+                                              height: 1,
+                                              color: Colors.black.withAlpha(45),
+                                              margin: EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 8,
+                                              ),
+                                            ),
+                                            Text(
+                                              '◦ ارتباط از طریق صندوق های دریافت شکایات در صحن های حرم مطهر',
                                             ),
                                           ],
                                         ),
@@ -273,57 +337,139 @@ class _RegistrationPageState extends State<RegistrationPage>
                                   ),
                                 ],
                               )
-                              : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Image.network(
-                                    'https://eform.shahecheragh.ir/collect/attach/preview/4062.jpg',
-                                    width: double.infinity,
-                                    height: 150,
-                                  ),
-                                  SizedBox(height: 20),
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text:
-                                              'سامانه ثبت شکایات، انتقادات و پیشنهادات حرم مطهر شاهچراغ ',
-                                          style: GoogleFonts.lalezar(
-                                            fontSize: 24,
+                              : Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Image.asset(
+                                      "assets/images/001.jpg",
+                                      width: 300,
+                                      height: 300,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    SizedBox(height: 10),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                'سامانه ثبت شکایات، انتقادات و پیشنهادات حرم مطهر شاهچراغ ',
+                                            style: GoogleFonts.lalezar(
+                                              fontSize: 24,
+                                            ),
                                           ),
-                                        ),
-                                        WidgetSpan(
-                                          child: Transform.translate(
-                                            offset: const Offset(3, -8),
-                                            child: Text(
-                                              'علیه السلام',
-                                              //superscript is usually smaller in size
-                                              // textScaleFactor: 0.7,
-                                              style: GoogleFonts.lalezar(
-                                                fontSize: 24,
-                                              ),
-                                              textScaler: TextScaler.linear(
-                                                0.7,
+                                          WidgetSpan(
+                                            child: Transform.translate(
+                                              offset: const Offset(3, -8),
+                                              child: Text(
+                                                'علیه السلام',
+                                                //superscript is usually smaller in size
+                                                // textScaleFactor: 0.7,
+                                                style: GoogleFonts.lalezar(
+                                                  fontSize: 24,
+                                                ),
+                                                textScaler: TextScaler.linear(
+                                                  0.7,
+                                                ),
                                               ),
                                             ),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    Container(
+                                      height: 1,
+                                      color: Colors.deepPurple.withAlpha(45),
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                    ),
+                                    Text(
+                                      'مسیر های ارسال شکایات، انتقادات یا پیشنهادات',
+                                      textAlign: TextAlign.justify,
+                                      style: GoogleFonts.lalezar(fontSize: 18),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Text('◦ شماره تلفن تماس: '),
+                                            TextButton(
+                                              onPressed: () {
+                                                _makePhoneCall("09368513575");
+                                              },
+                                              style: TextButton.styleFrom(
+                                                padding: EdgeInsets.zero,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                elevation: 0,
+                                                overlayColor:
+                                                    Colors.transparent,
+                                                shadowColor: Colors.transparent,
+                                              ),
+                                              child: Text(
+                                                '۰۹۳۶۸۵۱۳۵۷۵',
+                                                locale: Locale("fa", "IR"),
+                                                style: TextStyle(
+                                                  fontFamily: "Shabnam",
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          height: 1,
+                                          color: Colors.black.withAlpha(45),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                '◦ ارتباط در شبکه های اجتماعی(بله، ایتا، روبیکا و واتساپ): ',
+                                              ),
+                                            ),
+                                            Flexible(
+                                              child: SelectableText(
+                                                '۰۹۳۶۸۵۱۳۵۷۵',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          height: 1,
+                                          color: Colors.black.withAlpha(45),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                        ),
+                                        Text(
+                                          '◦ مراجعات حضوری: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن اصلی، طبقه دوم، جنب اداره کل حراست آستان مقدس، واحد رسیدگی به شکایات',
+                                        ),
+                                        Container(
+                                          height: 1,
+                                          color: Colors.black.withAlpha(45),
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                        ),
+                                        Text(
+                                          '◦ ارتباط از طریق صندوق های دریافت شکایات در صحن های حرم مطهر',
                                         ),
                                       ],
                                     ),
-                                  ),
-
-                                  SizedBox(height: 16),
-
-                                  Text('شماره تماس: 09179179117'),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'ارتباط در فضای مجازی (بله و ایتا): 09179179117',
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'آدرس: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن مطهر، اداره کل حراست آستان مقدس',
-                                  ),
-                                ],
+                                  ],
+                                ),
                               );
                         },
                       ),
@@ -383,7 +529,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           SizedBox(width: 16),
                                           Expanded(
                                             child: TextFormField(
+                                              keyboardType: TextInputType.phone,
                                               controller: phoneController,
+
                                               decoration: InputDecoration(
                                                 labelText:
                                                     'شماره تماس (اختیاری)',
@@ -412,7 +560,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                         children: [
                                           Expanded(
                                             child: TextFormField(
-                                              controller: nameController,
+                                              controller: cityController,
                                               decoration: InputDecoration(
                                                 labelText:
                                                     'شهر محل سکونت (اختیاری)',
@@ -437,7 +585,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           SizedBox(width: 16),
                                           Expanded(
                                             child: TextFormField(
-                                              controller: phoneController,
+                                              controller: edulevellController,
                                               decoration: InputDecoration(
                                                 labelText:
                                                     'میزان تحصیلات (اختیاری)',
@@ -525,7 +673,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                             Expanded(
                                               child: DropdownButton<String>(
                                                 hint: Text(
-                                                  "گزارش دهندگان (اختیاری)",
+                                                  "گزارش دهنده (اختیاری)",
                                                 ),
                                                 iconEnabledColor: Colors.blue,
                                                 isExpanded: true,
@@ -578,71 +726,6 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           ],
                                         ),
                                       ),
-                                      Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        height: 150,
-                                        child: TextField(
-                                          maxLines: 20,
-                                          maxLength: 500,
-                                          showCursor: true,
-                                          // style: inputFieldTextStyleDispenser,
-                                          controller: messageController,
-                                          keyboardType: TextInputType.multiline,
-                                          textInputAction:
-                                              TextInputAction.newline,
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(6),
-                                              ),
-                                              borderSide: BorderSide(
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-
-                                            labelText: 'متن پیام',
-                                            alignLabelWithHint: true,
-
-                                            hintText:
-                                                'توضیحات مورد نظر را به صورت کامل وارد نمایید',
-                                            focusColor: Colors.blue,
-                                            fillColor: Colors.blue,
-                                            // hintStyle: inputFieldHintTextStyleDispenser,
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(6),
-                                              ),
-                                              borderSide: BorderSide(
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 16,
-                                                ),
-                                            // border: inputFieldDefaultBorderStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 16),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 16.0,
-                                        ),
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          height: 200,
-                                          child: UploaderContainer(
-                                            onChanged: (list) {
-                                              filesList = list;
-                                              setState(() {});
-                                            },
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   )
                                   : Column(
@@ -670,9 +753,11 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 20),
+                                      SizedBox(height: 16),
                                       TextFormField(
+                                        keyboardType: TextInputType.phone,
                                         controller: phoneController,
+
                                         decoration: InputDecoration(
                                           labelText: 'شماره تماس (اختیاری)',
                                           border: OutlineInputBorder(),
@@ -690,173 +775,212 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           return null;
                                         },
                                       ),
+                                      SizedBox(height: 8),
+
+                                      TextFormField(
+                                        controller: cityController,
+                                        decoration: InputDecoration(
+                                          labelText: 'شهر محل سکونت (اختیاری)',
+                                          border: OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: 15,
+                                            horizontal: 10,
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'لطفا شهر محل سکونت خود را وارد کنید';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      SizedBox(height: 16),
+                                      TextFormField(
+                                        controller: edulevellController,
+                                        decoration: InputDecoration(
+                                          labelText: 'میزان تحصیلات (اختیاری)',
+                                          border: OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: 15,
+                                            horizontal: 10,
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'لطفا آخرین مدرک تحصیلی خود را وارد کنید';
+                                          }
+                                          return null;
+                                        },
+                                      ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 16,
                                         ),
-                                        child: Row(
+                                        child: Column(
                                           children: [
-                                            Expanded(
-                                              child: DropdownButton<String>(
-                                                hint: Text("موضوع (اختیاری)"),
-
-                                                iconEnabledColor: Colors.blue,
-                                                isExpanded: true,
-                                                elevation: 16,
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(12),
-                                                    ),
-                                                value: titleSelectedValue,
-                                                dropdownColor: Colors.white,
-                                                icon: const Icon(
-                                                  Icons.keyboard_arrow_down,
-                                                ),
-
-                                                items:
-                                                    titleList
-                                                        .map<
-                                                          DropdownMenuItem<
-                                                            String
-                                                          >
-                                                        >(
-                                                          (
-                                                            String item,
-                                                          ) => DropdownMenuItem<
-                                                            String
-                                                          >(
-                                                            value: item,
-                                                            child: Text(
-                                                              item.toString(),
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style:
-                                                                  const TextStyle(
-                                                                    fontSize:
-                                                                        16,
-                                                                  ),
-                                                            ),
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    titleSelectedValue =
-                                                        value.toString();
-                                                  });
-                                                },
+                                            DropdownButton<String>(
+                                              hint: Text(
+                                                "موضوع گزارش (اختیاری)",
                                               ),
+
+                                              iconEnabledColor: Colors.blue,
+                                              isExpanded: true,
+                                              elevation: 16,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(12),
+                                                  ),
+                                              value: titleSelectedValue,
+                                              dropdownColor: Colors.white,
+                                              icon: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                              ),
+
+                                              items:
+                                                  titleList
+                                                      .map<
+                                                        DropdownMenuItem<String>
+                                                      >(
+                                                        (
+                                                          String item,
+                                                        ) => DropdownMenuItem<
+                                                          String
+                                                        >(
+                                                          value: item,
+                                                          child: Text(
+                                                            item.toString(),
+                                                            textAlign:
+                                                                TextAlign
+                                                                    .center,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 16,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  titleSelectedValue =
+                                                      value.toString();
+                                                });
+                                              },
                                             ),
-                                            SizedBox(width: 26),
-                                            Expanded(
-                                              child: DropdownButton<String>(
-                                                hint: Text(
-                                                  "حوزه مربوطه (اختیاری)",
-                                                ),
-                                                iconEnabledColor: Colors.blue,
-                                                isExpanded: true,
-                                                elevation: 16,
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(12),
-                                                    ),
-                                                value: reporterSelectedValue,
-                                                dropdownColor: Colors.white,
-                                                icon: const Icon(
-                                                  Icons.keyboard_arrow_down,
-                                                ),
-
-                                                items:
-                                                    titleList
-                                                        .map<
-                                                          DropdownMenuItem<
-                                                            String
-                                                          >
-                                                        >(
-                                                          (
-                                                            String item,
-                                                          ) => DropdownMenuItem<
-                                                            String
-                                                          >(
-                                                            value: item,
-                                                            child: Text(
-                                                              item.toString(),
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style:
-                                                                  const TextStyle(
-                                                                    fontSize:
-                                                                        16,
-                                                                  ),
-                                                            ),
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    reporterSelectedValue =
-                                                        value.toString();
-                                                  });
-                                                },
+                                            SizedBox(height: 26),
+                                            DropdownButton<String>(
+                                              hint: Text(
+                                                "گزارش دهنده (اختیاری)",
                                               ),
+                                              iconEnabledColor: Colors.blue,
+                                              isExpanded: true,
+                                              elevation: 16,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(12),
+                                                  ),
+                                              value: reporterSelectedValue,
+                                              dropdownColor: Colors.white,
+                                              icon: const Icon(
+                                                Icons.keyboard_arrow_down,
+                                              ),
+
+                                              items:
+                                                  reporterList
+                                                      .map<
+                                                        DropdownMenuItem<String>
+                                                      >(
+                                                        (
+                                                          String item,
+                                                        ) => DropdownMenuItem<
+                                                          String
+                                                        >(
+                                                          value: item,
+                                                          child: Text(
+                                                            item.toString(),
+                                                            textAlign:
+                                                                TextAlign
+                                                                    .center,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 16,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  reporterSelectedValue =
+                                                      value.toString();
+                                                });
+                                              },
                                             ),
                                           ],
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        height: 150,
-                                        child: TextField(
-                                          maxLines: 20,
-                                          maxLength: 500,
-                                          showCursor: true,
-                                          // style: inputFieldTextStyleDispenser,
-                                          controller: messageController,
-                                          keyboardType: TextInputType.multiline,
-                                          textInputAction:
-                                              TextInputAction.newline,
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(6),
-                                              ),
-                                              borderSide: BorderSide(
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-
-                                            labelText: 'متن پیام',
-                                            alignLabelWithHint: true,
-
-                                            hintText:
-                                                'توضیحات مورد نظر را به صورت کامل وارد نمایید',
-                                            focusColor: Colors.blue,
-                                            fillColor: Colors.blue,
-                                            // hintStyle: inputFieldHintTextStyleDispenser,
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(6),
-                                              ),
-                                              borderSide: BorderSide(
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 16,
-                                                ),
-                                            // border: inputFieldDefaultBorderStyle,
-                                          ),
                                         ),
                                       ),
                                     ],
                                   );
                             },
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            height: 150,
+                            child: TextField(
+                              maxLines: 20,
+                              maxLength: 3000,
+                              showCursor: true,
+                              // style: inputFieldTextStyleDispenser,
+                              controller: messageController,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(6),
+                                  ),
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+
+                                labelText: 'متن پیام',
+                                alignLabelWithHint: true,
+
+                                hintText:
+                                    'توضیحات مورد نظر را به صورت کامل وارد نمایید',
+                                focusColor: Colors.blue,
+                                fillColor: Colors.blue,
+                                // hintStyle: inputFieldHintTextStyleDispenser,
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(6),
+                                  ),
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
+                                // border: inputFieldDefaultBorderStyle,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 200,
+                              child: UploaderContainer(
+                                onChanged: (list) {
+                                  filesList = list;
+                                  setState(() {});
+                                },
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -866,12 +990,29 @@ class _RegistrationPageState extends State<RegistrationPage>
               ),
               SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => sendMSG(name: "ali", message: 'hello', files: filesList),
+                onPressed: () {
+                  if (messageController.text.isNotEmpty) {
+                    sendMSG(
+                      name: nameController.text,
+                      phone: phoneController.text,
+                      city: cityController.text,
+                      loe: edulevellController.text,
+                      titleId: titleSelectedValue,
+                      reporterId: reporterSelectedValue,
+                      message: messageController.text,
+                      files: filesList,
+                    );
+                  } else {
+                    //dialog
+                  }
+                },
                 icon: Icon(Icons.arrow_back_ios_new),
                 label: Text('ثبت و ارسال پیام'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
                   textStyle: TextStyle(fontSize: 16),
+                  backgroundColor: Colors.lightGreen,
+                  foregroundColor: Colors.black,
                 ),
               ),
             ],
