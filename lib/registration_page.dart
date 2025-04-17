@@ -13,6 +13,8 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'my_alert_dialog.dart';
+
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -106,7 +108,7 @@ class _RegistrationPageState extends State<RegistrationPage>
     required String message,
     List<File>? files, // تغییر نوع files به لیست فایل‌ها
   }) async {
-    Uri uri = Uri.parse("https://alinematollahi.ir/api/send_msg");
+    Uri uri = Uri.parse("https://service.alinematollahi.ir/api/send_msg");
 
     var request = http.MultipartRequest("POST", uri);
 
@@ -122,6 +124,7 @@ class _RegistrationPageState extends State<RegistrationPage>
     // اضافه کردن فایل‌ها
     if (files != null && files.isNotEmpty) {
       for (var file in files) {
+        print("*******************.************${file.path}");
         var stream = http.ByteStream(file.openRead());
         var length = await file.length();
         var multipartFile = http.MultipartFile(
@@ -990,9 +993,9 @@ class _RegistrationPageState extends State<RegistrationPage>
               ),
               SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   if (messageController.text.isNotEmpty) {
-                    sendMSG(
+                    var response = await sendMSG(
                       name: nameController.text,
                       phone: phoneController.text,
                       city: cityController.text,
@@ -1002,6 +1005,13 @@ class _RegistrationPageState extends State<RegistrationPage>
                       message: messageController.text,
                       files: filesList,
                     );
+                    if (response.status == '1') {
+                      showDialog(
+                        context: context,
+                        builder: (context) => FinalAlertDialog(),
+                        barrierDismissible: false,
+                      );
+                    }
                   } else {
                     //dialog
                   }
