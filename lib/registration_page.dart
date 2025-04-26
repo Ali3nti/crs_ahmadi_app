@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crs_ahmadi/end_page.dart';
+import 'package:crs_ahmadi/final_page.dart';
 import 'package:crs_ahmadi/response_model.dart';
 import 'package:crs_ahmadi/uploader_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +15,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'global.dart';
 import 'my_alert_dialog.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -153,10 +156,9 @@ class _RegistrationPageState extends State<RegistrationPage>
   }
 
   void Function(String?)? onChanged;
-  List<String> titleList = ["شکایت", "درخواست", "انتقادات", "پیشنهادات"];
-  List<String> reporterList = ["زائرین", "خدام", "پرسنل", "شهروندان"];
-  String? titleSelectedValue;
-  String? reporterSelectedValue;
+
+  String titleSelectedValue = titleList.first;
+  String reporterSelectedValue = reporterList.first;
   List<File> filesList = [];
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -169,6 +171,8 @@ class _RegistrationPageState extends State<RegistrationPage>
       await launchUrl(telUri);
     }
   }
+
+  bool isClicked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -340,139 +344,136 @@ class _RegistrationPageState extends State<RegistrationPage>
                                   ),
                                 ],
                               )
-                              : Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Image.asset(
-                                      "assets/images/001.jpg",
-                                      width: 300,
-                                      height: 300,
-                                      fit: BoxFit.contain,
-                                    ),
-                                    SizedBox(height: 10),
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                'سامانه ثبت شکایات، انتقادات و پیشنهادات حرم مطهر شاهچراغ ',
-                                            style: GoogleFonts.lalezar(
-                                              fontSize: 24,
+                              : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Image.asset(
+                                    "assets/images/001.jpg",
+                                    width: 300,
+                                    height: 300,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  SizedBox(height: 10),
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              'سامانه ثبت شکایات، انتقادات و پیشنهادات حرم مطهر شاهچراغ ',
+                                          style: GoogleFonts.lalezar(
+                                            fontSize: 24,
+                                          ),
+                                        ),
+                                        WidgetSpan(
+                                          child: Transform.translate(
+                                            offset: const Offset(3, -8),
+                                            child: Text(
+                                              'علیه السلام',
+                                              //superscript is usually smaller in size
+                                              // textScaleFactor: 0.7,
+                                              style: GoogleFonts.lalezar(
+                                                fontSize: 24,
+                                              ),
+                                              textScaler: TextScaler.linear(
+                                                0.7,
+                                              ),
                                             ),
                                           ),
-                                          WidgetSpan(
-                                            child: Transform.translate(
-                                              offset: const Offset(3, -8),
-                                              child: Text(
-                                                'علیه السلام',
-                                                //superscript is usually smaller in size
-                                                // textScaleFactor: 0.7,
-                                                style: GoogleFonts.lalezar(
-                                                  fontSize: 24,
-                                                ),
-                                                textScaler: TextScaler.linear(
-                                                  0.7,
-                                                ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  Container(
+                                    height: 1,
+                                    color: Colors.deepPurple.withAlpha(45),
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                  Text(
+                                    'مسیر های ارسال شکایات، انتقادات یا پیشنهادات',
+                                    textAlign: TextAlign.justify,
+                                    style: GoogleFonts.lalezar(fontSize: 18),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Text('◦ شماره تلفن تماس: '),
+                                          TextButton(
+                                            onPressed: () {
+                                              _makePhoneCall("09368513575");
+                                            },
+                                            style: TextButton.styleFrom(
+                                              padding: EdgeInsets.zero,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              elevation: 0,
+                                              overlayColor: Colors.transparent,
+                                              shadowColor: Colors.transparent,
+                                            ),
+                                            child: Text(
+                                              '۰۹۳۶۸۵۱۳۵۷۵',
+                                              locale: Locale("fa", "IR"),
+                                              style: TextStyle(
+                                                fontFamily: "Shabnam",
                                               ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-
-                                    Container(
-                                      height: 1,
-                                      color: Colors.deepPurple.withAlpha(45),
-                                      margin: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
+                                      Container(
+                                        height: 1,
+                                        color: Colors.black.withAlpha(45),
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      'مسیر های ارسال شکایات، انتقادات یا پیشنهادات',
-                                      textAlign: TextAlign.justify,
-                                      style: GoogleFonts.lalezar(fontSize: 18),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Text('◦ شماره تلفن تماس: '),
-                                            TextButton(
-                                              onPressed: () {
-                                                _makePhoneCall("09368513575");
-                                              },
-                                              style: TextButton.styleFrom(
-                                                padding: EdgeInsets.zero,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                elevation: 0,
-                                                overlayColor:
-                                                    Colors.transparent,
-                                                shadowColor: Colors.transparent,
-                                              ),
-                                              child: Text(
-                                                '۰۹۳۶۸۵۱۳۵۷۵',
-                                                locale: Locale("fa", "IR"),
-                                                style: TextStyle(
-                                                  fontFamily: "Shabnam",
-                                                ),
-                                              ),
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              '◦ ارتباط در شبکه های اجتماعی(بله، ایتا، روبیکا و واتساپ): ',
                                             ),
-                                          ],
-                                        ),
-                                        Container(
-                                          height: 1,
-                                          color: Colors.black.withAlpha(45),
-                                          margin: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
                                           ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                '◦ ارتباط در شبکه های اجتماعی(بله، ایتا، روبیکا و واتساپ): ',
-                                              ),
+                                          Flexible(
+                                            child: SelectableText(
+                                              '۰۹۳۶۸۵۱۳۵۷۵',
                                             ),
-                                            Flexible(
-                                              child: SelectableText(
-                                                '۰۹۳۶۸۵۱۳۵۷۵',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Container(
-                                          height: 1,
-                                          color: Colors.black.withAlpha(45),
-                                          margin: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
                                           ),
+                                        ],
+                                      ),
+                                      Container(
+                                        height: 1,
+                                        color: Colors.black.withAlpha(45),
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
                                         ),
-                                        Text(
-                                          '◦ مراجعات حضوری: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن اصلی، طبقه دوم، جنب اداره کل حراست آستان مقدس، واحد رسیدگی به شکایات',
+                                      ),
+                                      Text(
+                                        '◦ مراجعات حضوری: شیراز، حرم مطهر حضرت شاهچراغ علیه السلام، صحن اصلی، طبقه دوم، جنب اداره کل حراست آستان مقدس، واحد رسیدگی به شکایات',
+                                      ),
+                                      Container(
+                                        height: 1,
+                                        color: Colors.black.withAlpha(45),
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
                                         ),
-                                        Container(
-                                          height: 1,
-                                          color: Colors.black.withAlpha(45),
-                                          margin: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                        ),
-                                        Text(
-                                          '◦ ارتباط از طریق صندوق های دریافت شکایات در صحن های حرم مطهر',
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                      ),
+                                      Text(
+                                        '◦ ارتباط از طریق صندوق های دریافت شکایات در صحن های حرم مطهر',
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               );
                         },
                       ),
@@ -636,7 +637,6 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                 icon: const Icon(
                                                   Icons.keyboard_arrow_down,
                                                 ),
-
                                                 items:
                                                     titleList
                                                         .map<
@@ -651,7 +651,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                           >(
                                                             value: item,
                                                             child: Text(
-                                                              item.toString(),
+                                                              item,
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -665,10 +665,11 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                         )
                                                         .toList(),
                                                 onChanged: (value) {
-                                                  setState(() {
-                                                    titleSelectedValue =
-                                                        value.toString();
-                                                  });
+                                                  titleSelectedValue =
+                                                      value ?? "خطا";
+                                                  setState(() {});
+
+                                                  print(titleSelectedValue);
                                                 },
                                               ),
                                             ),
@@ -756,7 +757,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 8),
                                       TextFormField(
                                         keyboardType: TextInputType.phone,
                                         controller: phoneController,
@@ -799,7 +800,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                           return null;
                                         },
                                       ),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 8),
                                       TextFormField(
                                         controller: edulevellController,
                                         decoration: InputDecoration(
@@ -868,10 +869,10 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                       )
                                                       .toList(),
                                               onChanged: (value) {
-                                                setState(() {
-                                                  titleSelectedValue =
-                                                      value.toString();
-                                                });
+                                                print(titleSelectedValue);
+                                                titleSelectedValue =
+                                                    value.toString();
+                                                setState(() {});
                                               },
                                             ),
                                             SizedBox(height: 26),
@@ -971,20 +972,20 @@ class _RegistrationPageState extends State<RegistrationPage>
                               ),
                             ),
                           ),
-                          SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 200,
-                              child: UploaderContainer(
-                                onChanged: (list) {
-                                  filesList = list;
-                                  setState(() {});
-                                },
-                              ),
-                            ),
-                          ),
+                          // SizedBox(height: 16),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(top: 16.0),
+                          //   child: SizedBox(
+                          //     width: double.infinity,
+                          //     height: 200,
+                          //     child: UploaderContainer(
+                          //       onChanged: (list) {
+                          //         filesList = list;
+                          //         setState(() {});
+                          //       },
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -992,39 +993,74 @@ class _RegistrationPageState extends State<RegistrationPage>
                 ),
               ),
               SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  if (messageController.text.isNotEmpty) {
-                    var response = await sendMSG(
-                      name: nameController.text,
-                      phone: phoneController.text,
-                      city: cityController.text,
-                      loe: edulevellController.text,
-                      titleId: titleSelectedValue,
-                      reporterId: reporterSelectedValue,
-                      message: messageController.text,
-                      files: filesList,
-                    );
-                    if (response.status == '1') {
-                      showDialog(
-                        context: context,
-                        builder: (context) => FinalAlertDialog(),
-                        barrierDismissible: false,
-                      );
-                    }
-                  } else {
-                    //dialog
-                  }
-                },
-                icon: Icon(Icons.arrow_back_ios_new),
-                label: Text('ثبت و ارسال پیام'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 36, vertical: 10),
-                  textStyle: TextStyle(fontSize: 16),
-                  backgroundColor: Colors.lightGreen,
-                  foregroundColor: Colors.black,
-                ),
-              ),
+              (!isClicked)
+                  ? ElevatedButton.icon(
+                    onPressed: () async {
+                      if (messageController.text.isNotEmpty) {
+                        print(titleSelectedValue);
+                        showDialog(
+                          context: context,
+                          builder: (context) => Loading(),
+                          barrierDismissible: false,
+                        );
+                        var response = await sendMSG(
+                          name: nameController.text,
+                          phone: phoneController.text,
+                          city: cityController.text,
+                          loe: edulevellController.text,
+                          titleId: titleSelectedValue,
+                          reporterId: reporterSelectedValue,
+                          message: messageController.text,
+                          files: filesList,
+                        );
+                        if (response.status == '1') {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (BuildContext context) =>
+                                      FinalPage(isOK: true),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      } else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (BuildContext context) =>
+                                    FinalPage(isOK: false),
+                          ),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    icon: Icon(Icons.arrow_back_ios_new),
+                    label: Text('ثبت و ارسال پیام'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 36,
+                        vertical: 10,
+                      ),
+                      textStyle: TextStyle(fontSize: 16),
+                      backgroundColor: Colors.lightGreen,
+                      foregroundColor: Colors.black,
+                    ),
+                  )
+                  : ElevatedButton.icon(
+                    onPressed: () {},
+                    label: SpinKitCircle(size: 50.0, color: Colors.indigo),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 36,
+                        vertical: 10,
+                      ),
+                      textStyle: TextStyle(fontSize: 16),
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.black,
+                    ),
+                  ),
             ],
           ),
         ),
