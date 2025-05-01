@@ -91,8 +91,8 @@ class _RegistrationPageState extends State<RegistrationPage>
     request.fields['phone'] = phone ?? 'null';
     request.fields['city'] = city ?? 'null';
     request.fields['loe'] = loe ?? 'null';
-    request.fields['titleId'] = titleId?.toString() ?? '0';
-    request.fields['reporterId'] = reporterId?.toString() ?? '0';
+    request.fields['title_id'] = titleId?.toString() ?? '0';
+    request.fields['reporter_id'] = reporterId?.toString() ?? '0';
     request.fields['message'] = message;
 
     // اضافه کردن فایل‌ها
@@ -627,8 +627,6 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                   titleSelectedValue =
                                                       value ?? "خطا";
                                                   setState(() {});
-
-                                                  print(titleSelectedValue);
                                                 },
                                               ),
                                             ),
@@ -653,11 +651,7 @@ class _RegistrationPageState extends State<RegistrationPage>
 
                                                 items:
                                                     reporterList
-                                                        .map<
-                                                          DropdownMenuItem<
-                                                            String
-                                                          >
-                                                        >(
+                                                        .map(
                                                           (
                                                             String item,
                                                           ) => DropdownMenuItem<
@@ -679,10 +673,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                         )
                                                         .toList(),
                                                 onChanged: (value) {
-                                                  setState(() {
-                                                    reporterSelectedValue =
-                                                        value.toString();
-                                                  });
+                                                  reporterSelectedValue =
+                                                      value ?? "خطا";
+                                                  setState(() {});
                                                 },
                                               ),
                                             ),
@@ -805,9 +798,7 @@ class _RegistrationPageState extends State<RegistrationPage>
 
                                               items:
                                                   titleList
-                                                      .map<
-                                                        DropdownMenuItem<String>
-                                                      >(
+                                                      .map(
                                                         (
                                                           String item,
                                                         ) => DropdownMenuItem<
@@ -828,9 +819,8 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                       )
                                                       .toList(),
                                               onChanged: (value) {
-                                                print(titleSelectedValue);
                                                 titleSelectedValue =
-                                                    value.toString();
+                                                    value ?? "خطا";
                                                 setState(() {});
                                               },
                                             ),
@@ -854,9 +844,7 @@ class _RegistrationPageState extends State<RegistrationPage>
 
                                               items:
                                                   reporterList
-                                                      .map<
-                                                        DropdownMenuItem<String>
-                                                      >(
+                                                      .map(
                                                         (
                                                           String item,
                                                         ) => DropdownMenuItem<
@@ -877,10 +865,9 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                       )
                                                       .toList(),
                                               onChanged: (value) {
-                                                setState(() {
-                                                  reporterSelectedValue =
-                                                      value.toString();
-                                                });
+                                                reporterSelectedValue =
+                                                    value ?? "خطا";
+                                                setState(() {});
                                               },
                                             ),
                                           ],
