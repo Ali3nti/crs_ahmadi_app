@@ -30,6 +30,21 @@ class _RegistrationPageState extends State<RegistrationPage>
   late AnimationController _controller;
   late Animation<double> _animation;
 
+  final TextEditingController nameController = TextEditingController();
+
+  final TextEditingController phoneController = TextEditingController();
+
+  final TextEditingController cityController = TextEditingController();
+
+  final TextEditingController edulevellController = TextEditingController();
+
+  final TextEditingController messageController = TextEditingController();
+
+  String? titleSelectedValue;
+  String? reporterSelectedValue;
+  List<File> filesList = [];
+  bool isClicked = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,50 +70,6 @@ class _RegistrationPageState extends State<RegistrationPage>
         child: EndPage(),
       ),
     );
-  }
-
-  final TextEditingController nameController = TextEditingController();
-
-  final TextEditingController phoneController = TextEditingController();
-
-  final TextEditingController cityController = TextEditingController();
-
-  final TextEditingController edulevellController = TextEditingController();
-
-  final TextEditingController titleController = TextEditingController();
-
-  final TextEditingController categoryController = TextEditingController();
-
-  final TextEditingController messageController = TextEditingController();
-
-  Future<void> uploadFile(selectedFileList) async {
-    print(selectedFileList.length);
-    if (selectedFileList.isEmpty) return;
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://127.0.0.1/api/send_msg'),
-    );
-    request.files.add(
-      await http.MultipartFile.fromPath('file', selectedFileList.first.path),
-    );
-
-    for (File file in selectedFileList) {
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'files', // Change this to match your API's expected field name
-          file.path,
-          filename: basename(file.path),
-        ),
-      );
-    }
-
-    var response = await request.send();
-    print(response.reasonPhrase.toString());
-    if (response.statusCode == 200) {
-      print('File uploaded successfully');
-    } else {
-      print('File upload failed');
-    }
   }
 
   Future<DataResponse> sendMSG({
@@ -155,12 +126,6 @@ class _RegistrationPageState extends State<RegistrationPage>
     }
   }
 
-  void Function(String?)? onChanged;
-
-  String titleSelectedValue = titleList.first;
-  String reporterSelectedValue = reporterList.first;
-  List<File> filesList = [];
-
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri telUri = Uri(
       scheme: 'tel',
@@ -171,8 +136,6 @@ class _RegistrationPageState extends State<RegistrationPage>
       await launchUrl(telUri);
     }
   }
-
-  bool isClicked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -639,11 +602,7 @@ class _RegistrationPageState extends State<RegistrationPage>
                                                 ),
                                                 items:
                                                     titleList
-                                                        .map<
-                                                          DropdownMenuItem<
-                                                            String
-                                                          >
-                                                        >(
+                                                        .map(
                                                           (
                                                             String item,
                                                           ) => DropdownMenuItem<
